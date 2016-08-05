@@ -1,0 +1,282 @@
+a,abbr,acronym,address,applet,article,aside,audio,b,big,blockquote,body,canvas,caption,center,cite,code,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,font,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,html,i,iframe,input,ins,kbd,label,legend,li,mark,menu,meter,nav,object,ol,output,p,pre,progress,q,rp,rt,ruby,s,samp,section,span,strike,strong,summary,table,tbody,td,textarea,tfoot,th,thead,time,tr,tt,u,ul,var,video,xmp {
+margin: 0;
+padding: 0;
+border: 0;
+outline: 0;
+border-radius: 0;
+font-size: 100%;
+font-weight: 400;
+font-family: "Helvetica Neue", Helvetica, sans-serif;
+vertical-align: baseline;
+background: transparent;
+-webkit-text-size-adjust: none;
+-webkit-box-sizing: border-box;
+-webkit-appearance: none;
+-webkit-tap-highlight-color: rgba(0,0,0,0);
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+}
+
+html, body {
+width: 100%;
+height: 100%;
+color: #fff;
+background: #000;
+}
+
+img { 
+max-width:100%;
+width:100%;
+}
+
+
+
+
+
+.slides,
+.overlay
+{
+width: 100%;
+height: 100%;
+overflow: hidden;
+position: absolute;	
+z-index: 2;
+left: 0;
+top: 0;
+}
+
+.wrapper
+{
+overflow: hidden;
+width: 100%;
+height: 100%;
+position: relative;
+}
+
+.slide
+{
+width: 100%;
+height: 100%;
+float: left;
+position: relative;
+overflow: hidden;
+}
+
+.slide:nth-child(1)
+{
+overflow: visible;
+}
+
+
+.bullets{
+width: 100%;
+line-height:33px;
+position: absolute;
+z-index: 2;
+left: 0;
+bottom: 0;
+padding: 0;
+vertical-align: top;
+text-align: center;
+
+}
+
+.bullet{
+width: 9px;
+height: 9px;
+border-radius: 999px;
+border: 1px solid #86878d;
+display: inline-block;
+margin: 0 4px;
+vertical-align: top;
+-webkit-transition: background 0.3s ease 0s;
+}
+
+.bullet.selected{
+border: 1px solid #fff;
+background: #fff;
+}
+
+
+
+
+
+
+
+div,
+figure,
+img{
+transition:all 500ms;
+}
+
+
+.viewport{
+width: 100%;
+height: 100%;
+position: absolute;
+overflow: hidden;
+background: rgba(0,0,0,.5);
+perspective: 1500px;
+}
+
+#cube{
+height: 200px;
+width: 200px;
+margin: 200px auto;
+text-align: center;
+line-height: 200px;
+transform-style: preserve-3d;
+}
+
+
+
+
+#cube figure {
+  width: 196px;
+  height: 196px;
+  display: block;
+  position: absolute;
+  border: 2px solid white;
+}
+
+
+#cube figure img{
+opacity:0;
+position: absolute;
+top: 0;
+left: 0;
+}
+
+#cube figure.in img{
+opacity:1;
+}
+
+
+#cube figure:hover img {
+opacity: .5;
+cursor: pointer;
+}
+
+
+
+#cube .front{
+	background:red;
+	transform: rotateY(   0deg ) translateZ( 100px );
+}
+#cube .back{
+	background:green;
+	transform: rotateX( 180deg ) translateZ( 100px );
+}
+#cube .right{
+	background:blue;
+	transform: rotateY(  90deg ) translateZ( 100px );
+}
+#cube .left{
+	background:orange;
+	transform: rotateY( -90deg ) translateZ( 100px );
+}
+#cube .top{
+	background:yellow;
+	transform: rotateX(  90deg ) translateZ( 100px );
+}
+#cube .bottom{
+	background:purple;
+	transform: rotateX( -90deg ) translateZ( 100px )
+}
+
+
+
+
+
+
+.viewport.trippy{
+	perspective:1px;
+}
+
+#cube.rotate{
+	transform: rotateX(190deg) rotateY(230deg) rotateZ(-10deg);
+}
+
+
+
+#cube.front,
+#cube.bottom,
+#cube.back,
+#cube.top,
+#cube.left,
+#cube.right{
+	transition-delay:500ms;
+}
+
+
+#cube.bottom{
+	transform: rotateX(90deg);
+}
+
+#cube.back{
+	transform: rotateX(180deg);
+}
+
+#cube.top{
+	transform: rotateX(270deg);
+}
+
+#cube.left{
+	transform: rotateY(90deg);
+}
+
+#cube.right{
+	transform: rotateY(270deg);
+}
+
+#cube.front{
+	transform: rotateX(0);
+}
+
+
+
+
+
+
+#cube.preExplode .left{
+	transform: rotateY(-90deg) translateZ(0);
+}
+
+#cube.explode .front{
+	transform: rotateY(0deg) translateZ(250px);
+}
+#cube.explode .back{
+	transform: rotateX(180deg) translateZ(250px);
+}
+#cube.explode .right{
+	transform: rotateY(90deg) translateZ(250px);
+}
+#cube.explode .left{
+	transform: rotateY(-90deg) translateZ(250px);
+}
+#cube.explode .top{
+	transform: rotateX(90deg) translateZ(250px);
+}
+#cube.explode .bottom{
+	transform: rotateX(-90deg) translateZ(250px)
+}
+
+#cube.rotate.slide{
+	transform: translateX(200px);
+}
+
+#cube.flipIn{
+	transform: rotateX(-110deg) rotateY(180deg) rotateZ(240deg);
+}
+
+#cube.scale{
+	transform: scale(2) rotateX(-110deg) rotateY(180deg) rotateZ(240deg) translateZ(-50px);
+}
+
+
+
+
+
+
+
+
