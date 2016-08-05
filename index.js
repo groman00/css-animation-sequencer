@@ -1,225 +1,96 @@
-var util = require('./lib/util.js');
-
-util.transitionSupport();
-
-var cube = util.select('#cube');
-
-window.setTimeout(function(){
-
-	cube.transitionSequence([
-		{
-			key: 'rotate'
-		},
-		{
-			key: 'preExplode',
-		},
-		{
-			key: 'explode',
-			node: 'figure',
-			callback: function(){
-				console.log('exploding');
-			}
-		},
-		{
-			key: 'rotate preExplode',
-			method: 'remove'
-		},
-		{
-			key: 'explode',
-			method: 'remove',
-			node: 'figure',
-			callback: function(){
-				
-				console.log('imploding');
-
-				util.select('.viewport').transitionSequence([
-					{
-						key: 'trippy'		
-					},
-					{
-						key: 'trippy',
-						method: 'remove',
-						callback: showFaces
-					}
-				]);
-				
-			}
-		}				
-	]);
-
-}, 0);
-
-
-
-
-
-
 /*
+* Run Animation Sequence on Object
+* @param sequence - array of objects, each representing a step in the animation
+* 	key: Class name to be added or removed. (Can be more than one)
+*		Required
+*	method: "add" or "remove" the key.  
+*		Default: "add"
+*	node: identifer for any child nodes that are animating.  Used to prevent bubbling.  If "suppress" option
+*		is not used, then this will fire one callback for all child animations.
+*		Optional
+*	suppress: prevents all child animations from firing callbacks
+*		Optional. Currently any value will suppress, but this may be extended
+*	callback: function called after transition end for the current step.
+*		Optional
+*/
 
-var faces = [
-	'bottom',
-	'back',
-	'top',
-	'left',
-	'right',
-	'front'
-];
+/**
+ * var sequencer = new Sequencer();
+ * sequencer.run(document.getElementById('cube'), [{}]);
+ * 
+ */
 
+var utils = require('./lib/utils.js');
+var registry = require('./lib/registry.js');
 
+function Sequencer(){
+	utils.transitionSupport();
+};
 
+Sequencer.prototype.run = function(element, sequence){
+	var length = sequence.length - 1;
+	var i = 0;
 
-function showFaces(){
+	(function iterate(){
 
-	console.log('faces');
+		var seq = sequence[i],
 
-	function show(f){
-		util.select('.' + f, cube).addClass('in');
-	}
+			method = seq.method || 'add',
 
+			step = function(e){
 
-	var sequence = [];
-
-	for(var i = 0, max = faces.length;i < max;i++){
-
-		(function(i){
-
-			sequence.push(
-				{
-					key: faces[i],
-					node:'img',
-					suppress: 'node',
-					callback: function(){
-						show(faces[i]);
-					}
+				console.log(e.target)
+				
+				if ( i < length) {
+					i++;	
+					iterate();
+				} else { 
+					registry.remove(element);
 				}
-			);
 
-		})(i);
-	
-	};
+				seq.callback && seq.callback.apply(null, []);
 
-	sequence.push(
-		{
-			key: 'front bottom back top left right',
-			method: 'remove',
-			node:'img',
-			suppress: 'node'
+			};
 
-		},
-		{
-			key: 'rotate'
-		},
-		{
-			key: 'flipIn',
-			callback:function(){
-				cube.removeClass('rotate');
-			}
-		},
-		{
-			key: 'scale',
-			callback:function(){
-				cube.removeClass('flipIn');
-			}
+
+		//If the animation is performed on the element's children and not the element,
+		//this will stop propagation and execute the callback only once.
+		if (seq.node){
+
+			var nodes = utils.selectAll(seq.node, element);
+
+			for (var j = nodes.length - 1; j >= 0; j--) {
+				
+				(function(j){
+
+					nodes[j].addEventListener('transitionend', function(e){
+						
+						e.stopPropagation();
+
+						e.target.removeEventListener('transitionend', arguments.callee);
+						
+						if (!seq.suppress){
+							(j === 0) && step(e);	
+						}
+						
+
+					});
+
+				})(j);
+
+			};
+
 		}
-	);
 
-	cube.transitionSequence(sequence);
+		registry.add(element, step);
+
+		method === 'add' ? utils.addClass(element, seq.key) : utils.removeClass(element, seq.key);
+		
+	})();
 
 };
 
-
-
-
-
-
-
-
-
-
-
-(function(){
-
-	var figures = util.selectAll('figure', cube);
-
-	for (var i = 0, max = figures.length; i < max; i++) {
-		
-		figures[i].onclick = function(){
-
-			console.log(this);
-			
-			var className = this.className.split(' ')[0];
-			
-			cube.className = (cube.className !== className) ? (cube.className = className) : (cube.className = 'scale');
-
-		}
-
-	};
-
-})();
-
-
-
-
-
-
-
-
-
-
-
-
-
-(function(){
-
-	window.onkeydown = function(e){
-
-		var current = faces.indexOf(cube.className.split(' ')[0]),
-			
-			next = 0;		
-
-		switch (e.keyCode){
-
-			//left
-			case 37:
-				next--;
-				break;
-			
-			//right
-			case 39:
-				next++;
-				break;			
-			
-			default:
-				next = false;
-				break;
-
-		};
-
-		if (next){
-
-			next = current + next;
-
-			(next < 0) && (next = faces.length - 1);
-
-			(next >= faces.length) && (next = 0);
-
-			cube.className = faces[next];
-
-		}
-
-	};
-
-})();
-
-
-*/
-
-
-
-
-
-
-
-
+//todo: export this so it works as a standalone script or an npm module
+window.Sequencer = Sequencer;
 
 
