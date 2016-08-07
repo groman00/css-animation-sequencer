@@ -90,7 +90,4 @@ Sequencer.prototype.run = function(element, sequence){
 
 };
 
-//todo: export this so it works as a standalone script or an npm module
-window.Sequencer = Sequencer;
-
-
+module.exports = Sequencer;
