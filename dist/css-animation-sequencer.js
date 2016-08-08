@@ -2,66 +2,72 @@
 /*
 * Run Animation Sequence on Object
 * @param sequence - array of objects, each representing a step in the animation
-* 	key: Class name to be added or removed. (Can be more than one)
-*		Required
-*	method: "add" or "remove" the key.  
-*		Default: "add"
-*	node: identifer for any child nodes that are animating.  Used to prevent bubbling.  If "suppress" option
-*		is not used, then this will fire one callback for all child animations.
-*		Optional
-*	suppress: prevents all child animations from firing callbacks
-*		Optional. Currently any value will suppress, but this may be extended
-*	callback: function called after transition end for the current step.
-*		Optional
+*   key: Class name to be added or removed. (Can be more than one)
+*       Required
+*   method: "add" or "remove" the key.
+*       Default: "add"
+*   node: identifer for any child nodes that are animating.  Used to prevent bubbling.  If "suppress" option
+*       is not used, then this will fire one callback for all child animations.
+*       Optional
+*   suppress: prevents all child animations from firing callbacks
+*       Optional. Currently any value will suppress, but this may be extended
+*   callback: function called after transition end for the current step.
+*       Optional
 */
 
 var utils = require('./lib/utils.js');
 var registry = require('./lib/registry.js');
 
-function Sequencer(){
-	utils.transitionSupport();
-};
+function Sequencer() {
+    utils.transitionSupport();
+}
 
-Sequencer.prototype.run = function(element, sequence){
-	var length = sequence.length - 1;
-	var i = 0;
+Sequencer.prototype.run = function (element, sequence) {
+    var length = sequence.length - 1;
+    var i = 0;
 
-	(function iterate(){
-		var nodes, j;
-		var seq = sequence[i];
-		var method = seq.method || 'add';
+    (function iterate() {
+        var nodes;
+        var j;
+        var seq = sequence[i];
+        var method = seq.method || 'add';
 
-		function step(e){
-			//console.log(e.target)
-			if ( i < length) {
-				i++;	
-				iterate();
-			} else { 
-				registry.remove(element);
-			}
-			seq.callback && seq.callback.apply(null, []);
-		};
+        function step(e) {
+            // console.log(e.target)
+            if (i < length) {
+                i++;
+                iterate();
+            } else {
+                registry.remove(element);
+            }
+            if (seq.callback) {
+                seq.callback.apply(null, []);
+            }
+        }
 
-		//If the animation is performed on the element's children and not the element,
-		//this will stop propagation and execute the callback only once.
-		if (seq.node){
-			nodes = utils.selectAll(seq.node, element);
-			for (j = nodes.length - 1; j >= 0; j--) {
-				(function(j){
-					nodes[j].addEventListener('transitionend', function(e){
-						e.stopPropagation();
-						e.target.removeEventListener('transitionend', arguments.callee);
-						if (!seq.suppress){
-							(j === 0) && step(e);	
-						}
-					});
-				})(j);
-			};
-		}
-
-		registry.add(element, step);
-		method === 'add' ? utils.addClass(element, seq.key) : utils.removeClass(element, seq.key);
-	})();
+        // If the animation is performed on the element's children and not the element,
+        // this will stop propagation and execute the callback only once.
+        if (seq.node) {
+            nodes = utils.selectAll(seq.node, element);
+            for (j = nodes.length - 1; j >= 0; j--) {
+                (function (x) {
+                    nodes[x].addEventListener('transitionend', function endCallback(e) {
+                        e.stopPropagation();
+                        e.target.removeEventListener('transitionend', endCallback);
+                        if (!seq.suppress && x === 0) {
+                            step(e);
+                        }
+                    });
+                }(j));
+            }
+        }
+        registry.add(element, step);
+        if (method === 'add') {
+            utils.addClass(element, seq.key);
+        } else {
+            utils.removeClass(element, seq.key);
+        }
+    }());
 };
 
 module.exports = Sequencer;
@@ -72,38 +78,41 @@ module.exports = Sequencer;
  * Keep track of anonymous callbacks and have the option to remove them on the fly.
  *
  * notes:
- *
  * Does the uniqueId generator need to be improved?  maybe use a date string instead.
  */
 
 var transitions = {};
 
-function uniqueId(name){
-    var id = name + Math.floor(Math.random()*100000);
+function uniqueId(name) {
+    var id = name + Math.floor(Math.random() * 100000);
     if (!transitions[id]) {
         return id;
-    } else {
-        uniqueId();
     }
-};
+    return uniqueId();
+}
 
-function add(element, listener){
-    var id = uniqueId(element.tagName);
-    transitions[id] = listener;
-    element.dataset.id && remove(element); //If element is already bound, remove listener
-    element.dataset.id = id;
-    element.addEventListener("transitionend", listener);
-};
+function remove(element) {
+    var el = element;
+    el.removeEventListener('transitionend', transitions[el.dataset.id]);
+    delete transitions[el.dataset.id];
+    delete el.dataset.id;
+}
 
-function remove(element){
-    element.removeEventListener("transitionend", transitions[element.dataset.id]);
-    delete transitions[element.dataset.id];
-    delete element.dataset.id;
-};
+module.exports.remove = remove;
 
+function add(element, listener) {
+    var el = element;
+    var id = uniqueId(el.tagName);
+    var callback = listener;
+    transitions[id] = callback;
+    if (el.dataset.id) {
+        remove(el); // If element is already bound, remove callback
+    }
+    el.dataset.id = id;
+    el.addEventListener('transitionend', callback);
+}
 
 module.exports.add = add;
-module.exports.remove = remove;
 
 },{}],3:[function(require,module,exports){
 var doc = document;

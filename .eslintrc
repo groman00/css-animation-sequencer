@@ -7,7 +7,9 @@
     "rules": {
         "indent": [2, 4],
         "no-var": 0,
+        "max-len": 0,
         "func-names": 0,
         "no-restricted-syntax": 0,
+        "no-unused-vars": [2, {"args": "none"}],
     }
 }
