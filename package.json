@@ -5,6 +5,9 @@
   "main": "gulpfile.js",
   "devDependencies": {
     "browserify": "^13.1.0",
+    "eslint": "^3.2.2",
+    "eslint-config-airbnb": "^10.0.0",
+    "eslint-plugin-import": "^1.12.0",
     "uglify-js": "^2.7.0"
   },
   "repository": {
@@ -20,6 +23,7 @@
   "scripts": {
     "build": "npm run build-debug && npm run build-min",
     "build-debug": "browserify index.js -s CSSAnimationSequencer -o dist/css-animation-sequencer.js",
-    "build-min": "uglifyjs dist/css-animation-sequencer.js --comments '/!/' -m screw_ie8=true -c screw_ie8=true,unused=false -o dist/css-animation-sequencer.min.js"  
+    "build-min": "uglifyjs dist/css-animation-sequencer.js --comments '/!/' -m screw_ie8=true -c screw_ie8=true,unused=false -o dist/css-animation-sequencer.min.js",
+    "lint": "./node_modules/.bin/eslint index.js lib/*.js; exit 0;"
   }
 }

@@ -15,12 +15,6 @@
 *		Optional
 */
 
-/**
- * var sequencer = new Sequencer();
- * sequencer.run(document.getElementById('cube'), [{}]);
- * 
- */
-
 var utils = require('./lib/utils.js');
 var registry = require('./lib/registry.js');
 
@@ -33,98 +27,44 @@ Sequencer.prototype.run = function(element, sequence){
 	var i = 0;
 
 	(function iterate(){
+		var nodes, j;
+		var seq = sequence[i];
+		var method = seq.method || 'add';
 
-		var seq = sequence[i],
-
-			method = seq.method || 'add',
-
-			step = function(e){
-
-				console.log(e.target)
-				
-				if ( i < length) {
-					i++;	
-					iterate();
-				} else { 
-					registry.remove(element);
-				}
-
-				seq.callback && seq.callback.apply(null, []);
-
-			};
-
+		function step(e){
+			//console.log(e.target)
+			if ( i < length) {
+				i++;	
+				iterate();
+			} else { 
+				registry.remove(element);
+			}
+			seq.callback && seq.callback.apply(null, []);
+		};
 
 		//If the animation is performed on the element's children and not the element,
 		//this will stop propagation and execute the callback only once.
 		if (seq.node){
-
-			var nodes = utils.selectAll(seq.node, element);
-
-			for (var j = nodes.length - 1; j >= 0; j--) {
-				
+			nodes = utils.selectAll(seq.node, element);
+			for (j = nodes.length - 1; j >= 0; j--) {
 				(function(j){
-
 					nodes[j].addEventListener('transitionend', function(e){
-						
 						e.stopPropagation();
-
 						e.target.removeEventListener('transitionend', arguments.callee);
-						
 						if (!seq.suppress){
 							(j === 0) && step(e);	
 						}
-						
-
 					});
-
 				})(j);
-
 			};
-
 		}
 
 		registry.add(element, step);
-
 		method === 'add' ? utils.addClass(element, seq.key) : utils.removeClass(element, seq.key);
-		
 	})();
-
 };
 
 module.exports = Sequencer;
-
-/*
-eliminate gulp.  use npm to build, like this:
-https://github.com/sachinchoolur/lightgallery.js/blob/master/package.json
- */
-
-/*	if ( typeof module === "object" && typeof module.exports === "object" ) {
-		// For CommonJS and CommonJS-like environments where a proper `window`
-		// is present, execute the factory and get jQuery.
-		// For environments that do not have a `window` with a `document`
-		// (such as Node.js), expose a factory as module.exports.
-		// This accentuates the need for the creation of a real `window`.
-		// e.g. var jQuery = require("jquery")(window);
-		// See ticket #14549 for more info.
-		module.exports = global.document ?
-			factory( global, true ) :
-			function( w ) {
-				if ( !w.document ) {
-					throw new Error( "jQuery requires a window with a document" );
-				}
-				return factory( w );
-			};
-	} else {
-		factory( global );
-	}*/
-//console.log(module);
-//todo: export this so it works as a standalone script or an npm module
-// I think I have to remove browserify for this to work as a plain browser script.  maybe require js instead? or just one file.
-// if (typeof exports !== 'undefined') {
-// 	module.exports = Sequencer
-// } else {
-//     window.Sequencer = Sequencer;
-// }
 
 },{"./lib/registry.js":2,"./lib/utils.js":3}],2:[function(require,module,exports){
 /*
@@ -168,57 +108,57 @@ module.exports.remove = remove;
 },{}],3:[function(require,module,exports){
 var doc = document;
 
-function Utils(){};
+function Utils() {}
 
-Utils.prototype.select = function(query, context, index) {
+Utils.prototype.select = function (query, context, index) {
+    var ctx = context;
     if (typeof context !== 'object') {
-        context = context ? doc.querySelectorAll(context)[0] : doc;   
+        ctx = context ? doc.querySelectorAll(context)[0] : doc;
     }
-    index = index || 0;
-    return context.querySelectorAll(query)[index];
+    return ctx.querySelectorAll(query)[index || 0];
 };
 
-Utils.prototype.selectAll = function(query, context){
+Utils.prototype.selectAll = function (query, context) {
+    var ctx = context;
     if (typeof context !== 'object') {
-        context = context ? doc.querySelectorAll(context)[0] : doc;   
+        ctx = context ? doc.querySelectorAll(context)[0] : doc;
     }
-    return context.querySelectorAll(query);
+    return ctx.querySelectorAll(query);
 };
 
-Utils.prototype.transitionSupport = function() {
+Utils.prototype.transitionSupport = function () {
+    var name;
     var el = document.createElement('css-animation-sequencer');
     var transEndEventNames = {
-        WebkitTransition : 'webkitTransitionEnd',
-        MozTransition    : 'transitionend',
-        OTransition      : 'oTransitionEnd otransitionend',
-        transition       : 'transitionend'
+        WebkitTransition: 'webkitTransitionEnd',
+        MozTransition: 'transitionend',
+        OTransition: 'oTransitionEnd otransitionend',
+        transition: 'transitionend',
     };
-    for (var name in transEndEventNames) {
+    for (name in transEndEventNames) {
         if (el.style[name] !== undefined) {
-            return { end: transEndEventNames[name] }
+            return { end: transEndEventNames[name] };
         }
     }
     return false;
 };
 
-Utils.prototype.addClass = function(elem, list){
-    var i;
-    list = list.split(' ');
-    i = list.length;
+Utils.prototype.addClass = function (elem, classNames) {
+    var list = classNames.split(' ');
+    var i = list.length;
     while (i) {
         i -= 1;
-        elem.classList.add(list[i]);    
-    }   
+        elem.classList.add(list[i]);
+    }
 };
 
-Utils.prototype.removeClass = function(elem, list){
-    var i;
-    list = list.split(' ');
-    i = list.length;
+Utils.prototype.removeClass = function (elem, classNames) {
+    var list = classNames.split(' ');
+    var i = list.length;
     while (i) {
         i -= 1;
-        elem.classList.remove(list[i]);    
-    }   
+        elem.classList.remove(list[i]);
+    }
 };
 
 module.exports = new Utils();

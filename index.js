@@ -14,12 +14,6 @@
 *		Optional
 */
 
-/**
- * var sequencer = new Sequencer();
- * sequencer.run(document.getElementById('cube'), [{}]);
- * 
- */
-
 var utils = require('./lib/utils.js');
 var registry = require('./lib/registry.js');
 
@@ -32,62 +26,41 @@ Sequencer.prototype.run = function(element, sequence){
 	var i = 0;
 
 	(function iterate(){
+		var nodes, j;
+		var seq = sequence[i];
+		var method = seq.method || 'add';
 
-		var seq = sequence[i],
-
-			method = seq.method || 'add',
-
-			step = function(e){
-
-				console.log(e.target)
-				
-				if ( i < length) {
-					i++;	
-					iterate();
-				} else { 
-					registry.remove(element);
-				}
-
-				seq.callback && seq.callback.apply(null, []);
-
-			};
-
+		function step(e){
+			//console.log(e.target)
+			if ( i < length) {
+				i++;	
+				iterate();
+			} else { 
+				registry.remove(element);
+			}
+			seq.callback && seq.callback.apply(null, []);
+		};
 
 		//If the animation is performed on the element's children and not the element,
 		//this will stop propagation and execute the callback only once.
 		if (seq.node){
-
-			var nodes = utils.selectAll(seq.node, element);
-
-			for (var j = nodes.length - 1; j >= 0; j--) {
-				
+			nodes = utils.selectAll(seq.node, element);
+			for (j = nodes.length - 1; j >= 0; j--) {
 				(function(j){
-
 					nodes[j].addEventListener('transitionend', function(e){
-						
 						e.stopPropagation();
-
 						e.target.removeEventListener('transitionend', arguments.callee);
-						
 						if (!seq.suppress){
 							(j === 0) && step(e);	
 						}
-						
-
 					});
-
 				})(j);
-
 			};
-
 		}
 
 		registry.add(element, step);
-
 		method === 'add' ? utils.addClass(element, seq.key) : utils.removeClass(element, seq.key);
-		
 	})();
-
 };
 
 module.exports = Sequencer;
